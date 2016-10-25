@@ -9,19 +9,20 @@ This module processes text through the sentiment analysis API
 .. seealso:: http://text-processing.com/docs/sentiment.html
 
 """
+import json
 import requests
 
-SENTIMENT_API_URL = 'http://text-processing.com/api/sentiment/'
+import sys
+
 
 class Sentiment:
-    def __init__(self, api_url=SENTIMENT_API_URL):
-        self._api_url = api_url
+    def __init__(self):
         self._last_text = ''
         self._last_score = 0.0
         self._last_probabilities = {}
 
     def analyze(self, text):
-        return self.score_sentiment(self._analyze_text(text, self._api_url))
+        return self.score_sentiment(self._analyze_text(text))
 
     def score_sentiment(self, raw_probabilities):
         probs = raw_probabilities
@@ -31,46 +32,34 @@ class Sentiment:
 
         return score
 
-    def _analyze_text(self, text, api_url=None):
-        """Sentiment analysis
-
-        :returns:
-            {
-                "label": "pos", "neg" or "neutral",
-                "probability": {
-                    "neg": float,
-                    "neutral": float,
-                    "pos": float
+    def _analyze_text(self, text):
+        try:
+            res = requests.post("https://japerk-text-processing.p.mashape.com/sentiment/",
+                headers={
+                    "X-Mashape-Key": "9Fp0ZKRkK5mshGbjZxPKQ1gHCqg0p1MzIcmjsnM6a17MnXlBwM",
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Accept": "application/json"
+                },
+                data={
+                    "language": "english",
+                    "text": text
                 }
+            ).json()
+        except json.JSONDecodeError as e:
+            print(e)
+            self._last_probabilities = {
+                'neutral': 1.00,
+                'pos': 0.00,
+                'neg': 0.00
             }
-
-        :raises:
-            - requests.exceptions.RequestException
-            - requests.exceptions.HTTPError
-            - json.JSONDecodeError
-
-        """
-        if not api_url:
-            raise RuntimeError('No language processing API URL provided.')
-
-        response = requests.post(SENTIMENT_API_URL, data={'text': text})
-        response.raise_for_status()
-
-        self._last_text = text
-        self._last_probabilities = response.json()['probability']
-
-        return self._last_probabilities
-
-    @property
-    def api_url(self):
-        return self.api_url
-
-    @api_url.setter
-    def api_url(self, new_api_url):
-        if not new_api_url or not isinstance(new_api_url, str):
-            pass
+            self._last_text = text
+            return self._last_probabilities
+        except (KeyboardInterrupt, SystemExit) as e:
+            raise e
         else:
-            self._api_url = new_api_url
+            self._last_probabilities = res['probability']
+            self._last_text = text
+            return self._last_probabilities
 
     @property
     def last_score(self):
