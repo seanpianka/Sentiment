@@ -1,6 +1,6 @@
 """
-sentiment
-~~~~~~~~~
+sentiment.online_sentiment
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 This module processes text through the sentiment analysis API
 
@@ -15,13 +15,13 @@ import requests
 import sys
 
 
-class Sentiment:
+class OnlineSentiment:
     def __init__(self):
         self._last_text = ''
         self._last_score = 0.0
         self._last_probabilities = {}
 
-    def analyze(self, text):
+    def classify(self, text):
         return self.score_sentiment(self._analyze_text(text))
 
     def score_sentiment(self, raw_probabilities):
@@ -32,7 +32,7 @@ class Sentiment:
 
         return score
 
-    def _analyze_text(self, text):
+    def _classify_text(self, text):
         try:
             res = requests.post("https://japerk-text-processing.p.mashape.com/sentiment/",
                 headers={
@@ -87,4 +87,4 @@ if __name__ == '__main__':
 
     while True:
         word = str(input('Enter a string: '))
-        print("The value was {}".format(s.analyze(word)))
+        print("The value was {}".format(s.classify(word)))
