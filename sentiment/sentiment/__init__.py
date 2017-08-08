@@ -23,8 +23,6 @@ from sklearn.svm import SVC, LinearSVC, NuSVC
 
 STOP_WORDS = set(stopwords.words("english"))
 TRAINED_CLASSIFIERS_DIR = os.path.join(os.path.dirname(__file__), 'trained')
-print(TRAINED_CLASSIFIERS_DIR)
-exit()
 
 
 class VoteClassifier(ClassifierI):
