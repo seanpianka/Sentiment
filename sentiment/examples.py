@@ -21,23 +21,11 @@ from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.svm import SVC, LinearSVC, NuSVC
 
 
-class VoteClassifier(ClassifierI):
-    def __init__(self, *classifiers):
-        self._classifiers = classifiers
-
-    def classify(self, features):
-        return mode([c.classify(features) for c in self._classifiers])
-
-    def confidence(self, features):
-        votes = [c.classify(features) for c in self._classifiers]
-        choice_votes = votes.count(mode(votes))
-        confidence_rating = choice_votes / len(votes)
-        return confidence_rating
-
-
 def stopword_ex1():
     neg_text = "NNRQ has done well in the past few quarters, but is not expected to do well over the next year. TTWO was doing poorly, but is now on a steady increase that is expected to last for several quarters."
-    filtered_sentence = [w for w in word_tokenize(neg_text) if w not in set(stopwords.words("english"))]
+    filtered_sentence = [
+        w for w in word_tokenize(neg_text) if w not in set(stopwords.words("english"))
+    ]
     print(filtered_sentence)
 
 
@@ -108,13 +96,17 @@ def wordnet_ex3():
 
 
 def text_classifier():
-    documents = [(list(movie_reviews.words(fileid)), category)
-                 for category in movie_reviews.categories()
-                 for fileid in movie_reviews.fileids(category)]
+    documents = [
+        (list(movie_reviews.words(fileid)), category)
+        for category in movie_reviews.categories()
+        for fileid in movie_reviews.fileids(category)
+    ]
 
     random.shuffle(documents)
     stop_words = set(stopwords.words("english"))
-    all_words = nltk.FreqDist([w.lower() for w in movie_reviews.words() if w not in stop_words])
+    all_words = nltk.FreqDist(
+        [w.lower() for w in movie_reviews.words() if w not in stop_words]
+    )
 
     word_features = list(all_words.keys())[:3000]
 
@@ -122,10 +114,10 @@ def text_classifier():
         words = set(document)
         features = {}
         for w in word_features:
-            features[w] = (w in words)
+            features[w] = w in words
         return features
 
-    print(find_features(movie_reviews.words('neg/cv000_29416.txt')))
+    print(find_features(movie_reviews.words("neg/cv000_29416.txt")))
     feature_sets = [(find_features(rev), category) for (rev, category) in documents]
 
     training_set = feature_sets[:1900]
@@ -142,7 +134,9 @@ def text_classifier():
         with open(classifier_pickle, "wb") as f:
             pickle.dump(classifier, f)
 
-    print("Original NB Accuracy:", nltk.classify.accuracy(classifier, testing_set)*100)
+    print(
+        "Original NB Accuracy:", nltk.classify.accuracy(classifier, testing_set) * 100
+    )
     classifier.show_most_informative_features(15)
     ###########################################################################
     MNB_classifier_pickle = "MNB_naivebayes.pkl"
@@ -156,21 +150,21 @@ def text_classifier():
         with open(MNB_classifier_pickle, "wb") as f:
             pickle.dump(MNB_classifier, f)
 
-    print("MNB_NB Accuracy:", nltk.classify.accuracy(MNB_classifier, testing_set)*100)
+    print("MNB_NB Accuracy:", nltk.classify.accuracy(MNB_classifier, testing_set) * 100)
     ###########################################################################
-    #GNB_classifier_pickle = "GNB_naivebayes.pkl"
-    #if os.path.isfile(GNB_classifier_pickle):
+    # GNB_classifier_pickle = "GNB_naivebayes.pkl"
+    # if os.path.isfile(GNB_classifier_pickle):
     #    with open(GNB_classifier_pickle, "rb") as f:
     #        GNB_classifier = pickle.load(f)
-    #else:
+    # else:
     #    # posterior = prior occurences * likelihood / evidence
     #    GNB_classifier = SklearnClassifier(GaussianNB())
     #    GNB_classifier.train(training_set)
     #    with open(GNB_classifier_pickle, "wb") as f:
     #        pickle.dump(GNB_classifier, f)
 
-    #print("GNB_NB Accuracy:", nltk.classify.accuracy(GNB_classifier, testing_set)*100)
-    #GNB_classifier.show_most_informative_features(15)
+    # print("GNB_NB Accuracy:", nltk.classify.accuracy(GNB_classifier, testing_set)*100)
+    # GNB_classifier.show_most_informative_features(15)
     ###########################################################################
     BNB_classifier_pickle = "BNB_naivebayes.pkl"
     if os.path.isfile(BNB_classifier_pickle):
@@ -183,7 +177,7 @@ def text_classifier():
         with open(BNB_classifier_pickle, "wb") as f:
             pickle.dump(BNB_classifier, f)
 
-    print("BNB_NB Accuracy:", nltk.classify.accuracy(BNB_classifier, testing_set)*100)
+    print("BNB_NB Accuracy:", nltk.classify.accuracy(BNB_classifier, testing_set) * 100)
     ###########################################################################
     LOGREG_classifier_pickle = "LOGREG_naivebayes.pkl"
     if os.path.isfile(LOGREG_classifier_pickle):
@@ -196,7 +190,10 @@ def text_classifier():
         with open(LOGREG_classifier_pickle, "wb") as f:
             pickle.dump(LOGREG_classifier, f)
 
-    print("LOGREG_NB Accuracy:", nltk.classify.accuracy(LOGREG_classifier, testing_set)*100)
+    print(
+        "LOGREG_NB Accuracy:",
+        nltk.classify.accuracy(LOGREG_classifier, testing_set) * 100,
+    )
     ###########################################################################
     SGD_classifier_pickle = "SGD_naivebayes.pkl"
     if os.path.isfile(SGD_classifier_pickle):
@@ -209,7 +206,7 @@ def text_classifier():
         with open(SGD_classifier_pickle, "wb") as f:
             pickle.dump(SGD_classifier, f)
 
-    print("SGD_NB Accuracy:", nltk.classify.accuracy(SGD_classifier, testing_set)*100)
+    print("SGD_NB Accuracy:", nltk.classify.accuracy(SGD_classifier, testing_set) * 100)
     ###########################################################################
     LSVC_classifier_pickle = "LSVC_naivebayes.pkl"
     if os.path.isfile(LSVC_classifier_pickle):
@@ -222,7 +219,9 @@ def text_classifier():
         with open(LSVC_classifier_pickle, "wb") as f:
             pickle.dump(LSVC_classifier, f)
 
-    print("LSVC_NB Accuracy:", nltk.classify.accuracy(LSVC_classifier, testing_set)*100)
+    print(
+        "LSVC_NB Accuracy:", nltk.classify.accuracy(LSVC_classifier, testing_set) * 100
+    )
     ###########################################################################
     NUSVC_classifier_pickle = "NUSVC_naivebayes.pkl"
     if os.path.isfile(NUSVC_classifier_pickle):
@@ -235,29 +234,56 @@ def text_classifier():
         with open(NUSVC_classifier_pickle, "wb") as f:
             pickle.dump(NUSVC_classifier, f)
 
-    print("NUSVC_NB Accuracy:", nltk.classify.accuracy(NUSVC_classifier, testing_set)*100)
+    print(
+        "NUSVC_NB Accuracy:",
+        nltk.classify.accuracy(NUSVC_classifier, testing_set) * 100,
+    )
     ###########################################################################
 
-    voted_classifier = VoteClassifier(classifier,
-                                      MNB_classifier,
-                                      BNB_classifier,
-                                      LOGREG_classifier,
-                                      SGD_classifier,
-                                      LSVC_classifier,
-                                      NUSVC_classifier)
-    print("voted_classifier Accuracy:", nltk.classify.accuracy(voted_classifier, testing_set)*100)
-    print("Classification:", voted_classifier.classify(testing_set[0][0]),
-          "Confidence %:", voted_classifier.confidence(testing_set[0][0]))
-    print("Classification:", voted_classifier.classify(testing_set[1][0]),
-          "Confidence %:", voted_classifier.confidence(testing_set[1][0]))
-    print("Classification:", voted_classifier.classify(testing_set[2][0]),
-          "Confidence %:", voted_classifier.confidence(testing_set[2][0]))
-    print("Classification:", voted_classifier.classify(testing_set[3][0]),
-          "Confidence %:", voted_classifier.confidence(testing_set[3][0]))
-    print("Classification:", voted_classifier.classify(testing_set[4][0]),
-          "Confidence %:", voted_classifier.confidence(testing_set[4][0]))
+    voted_classifier = VoteClassifier(
+        classifier,
+        MNB_classifier,
+        BNB_classifier,
+        LOGREG_classifier,
+        SGD_classifier,
+        LSVC_classifier,
+        NUSVC_classifier,
+    )
+    print(
+        "voted_classifier Accuracy:",
+        nltk.classify.accuracy(voted_classifier, testing_set) * 100,
+    )
+    print(
+        "Classification:",
+        voted_classifier.classify(testing_set[0][0]),
+        "Confidence %:",
+        voted_classifier.confidence(testing_set[0][0]),
+    )
+    print(
+        "Classification:",
+        voted_classifier.classify(testing_set[1][0]),
+        "Confidence %:",
+        voted_classifier.confidence(testing_set[1][0]),
+    )
+    print(
+        "Classification:",
+        voted_classifier.classify(testing_set[2][0]),
+        "Confidence %:",
+        voted_classifier.confidence(testing_set[2][0]),
+    )
+    print(
+        "Classification:",
+        voted_classifier.classify(testing_set[3][0]),
+        "Confidence %:",
+        voted_classifier.confidence(testing_set[3][0]),
+    )
+    print(
+        "Classification:",
+        voted_classifier.classify(testing_set[4][0]),
+        "Confidence %:",
+        voted_classifier.confidence(testing_set[4][0]),
+    )
 
 
 if __name__ == "__main__":
     text_classifier()
-
